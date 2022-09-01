@@ -2,9 +2,11 @@ package lt.markmerkk.testlocationfetch
 
 import android.app.Application
 import androidx.startup.AppInitializer
+import dagger.hilt.android.HiltAndroidApp
 import net.danlew.android.joda.JodaTimeInitializer
 import timber.log.Timber
 
+@HiltAndroidApp
 class App: Application() {
 
     override fun onCreate() {

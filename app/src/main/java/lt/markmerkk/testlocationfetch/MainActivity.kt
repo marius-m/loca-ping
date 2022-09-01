@@ -11,9 +11,10 @@ import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
+import dagger.hilt.android.AndroidEntryPoint
 import lt.markmerkk.testlocationfetch.databinding.ActivityMainBinding
 
-
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
     private lateinit var appBarConfiguration: AppBarConfiguration
@@ -41,9 +42,10 @@ class MainActivity : AppCompatActivity() {
         } else {
             // Make a request for foreground-only location access.
             ActivityCompat.requestPermissions(
-                this, arrayOf(
+                this,
+                arrayOf(
                     Manifest.permission.ACCESS_FINE_LOCATION,
-                    Manifest.permission.FOREGROUND_SERVICE,
+                    Manifest.permission.FOREGROUND_SERVICE
                 ),
                 AppConstants.REQUEST_TAG_PERMISSION_LOCATION
             )
