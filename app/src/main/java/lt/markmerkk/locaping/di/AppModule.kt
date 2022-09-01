@@ -1,5 +1,6 @@
 package lt.markmerkk.locaping.di
 
+import android.app.Application
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -8,6 +9,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import lt.markmerkk.locaping.App
 import lt.markmerkk.locaping.AppTimeProvider
 import lt.markmerkk.locaping.AppTimeProviderAndroid
 import lt.markmerkk.locaping.BuildConfig
@@ -17,6 +19,11 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 class AppModule {
+
+    @Provides
+    fun provideAppContext(
+        application: Application
+    ): App = application as App
 
     @Provides
     @Singleton

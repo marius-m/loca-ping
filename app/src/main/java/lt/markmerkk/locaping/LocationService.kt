@@ -169,6 +169,7 @@ class LocationService : Service(), LifecycleOwner {
 
     companion object {
         private const val CHANNEL_ID_DEFAULT = "65beac30-0e52-415a-a52f-f2a24728e787"
-        private const val DEFAULT_UPDATE_INTERVAL_MILLIS: Long = 1000 * 15
+        private const val DEFAULT_UPDATE_INTERVAL_MINS: Long = 5
+        private const val DEFAULT_UPDATE_INTERVAL_MILLIS: Long = 1000 * 60 * DEFAULT_UPDATE_INTERVAL_MINS
     }
 }

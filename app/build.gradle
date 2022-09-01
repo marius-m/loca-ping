@@ -41,6 +41,12 @@ android {
     }
 }
 
+repositories {
+    google()
+    mavenCentral()
+    maven { url "https://jitpack.io" }
+}
+
 dependencies {
 
     // Android
@@ -74,6 +80,7 @@ dependencies {
     // Other
     implementation "com.jakewharton.timber:timber:5.0.1"
     implementation "net.danlew:android.joda:2.10.9.1"
+    implementation 'com.github.danielceinos:User-Agent-Interceptor:1.0.3'
 
     testImplementation "junit:junit:4.13.2"
     testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:1.5.1"
