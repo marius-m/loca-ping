@@ -7,6 +7,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import lt.markmerkk.testlocationfetch.BuildConfigData
+import lt.markmerkk.testlocationfetch.network.NetworkErrorHandler
 import lt.markmerkk.testlocationfetch.network.RetrofitFactory
 import lt.markmerkk.testlocationfetch.network.UnauthorizedClient
 import okhttp3.OkHttpClient
@@ -26,6 +27,13 @@ class NetworkModule {
         val clientBuilder = RetrofitFactory
             .createUnauthorizedClientBuilder(isDebug = buildConfigData.isDebug)
         return clientBuilder
+    }
+
+    @Provides
+    fun provideNetworkErrorHandler(
+        objectMapper: ObjectMapper,
+    ): NetworkErrorHandler {
+        return NetworkErrorHandler(objectMapper = objectMapper)
     }
 
     @UnauthorizedClient
