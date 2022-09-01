@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="lt.markmerkk.testlocationfetch">
+    package="lt.markmerkk.locaping">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
@@ -17,11 +17,11 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Testlocationfetch"
-        android:name=".App"
+        android:name="lt.markmerkk.locaping.App"
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
-            android:name=".MainActivity"
+            android:name="lt.markmerkk.locaping.MainActivity"
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.Testlocationfetch.NoActionBar">
@@ -33,7 +33,7 @@
         </activity>
 
         <service
-            android:name=".LocationService"
+            android:name="lt.markmerkk.locaping.LocationService"
             android:foregroundServiceType="location"
             android:enabled="true"
             android:exported="true" />
