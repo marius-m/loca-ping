@@ -11,14 +11,8 @@ import timber.log.Timber
 object AppDateTimeUtils {
     const val DEFAULT_FORMAT_DATE = "yyyy-MM-dd"
     const val DEFAULT_FORMAT_DATETIME = "yyyy-MM-dd'T'HH:mm:ssZZ"
-    const val DEFAULT_FORMAT_TIME_DETAIL = "HH:mm:ssZZ"
-    const val DEFAULT_FORMAT_TIME_BASIC = "HH'h' mm'min'"
-    const val DEFAULT_FORMAT_DATETIME_BASIC = "yyyy-MM-dd HH:mm"
     val dtFormatterDate = DateTimeFormat.forPattern(DEFAULT_FORMAT_DATE)
     val dtFormatterDateTime = DateTimeFormat.forPattern(DEFAULT_FORMAT_DATETIME)
-
-    val dtFormatterTimeDetail = DateTimeFormat.forPattern(DEFAULT_FORMAT_TIME_DETAIL)
-    val dtFormatterDateTimeBasic = DateTimeFormat.forPattern(DEFAULT_FORMAT_DATETIME_BASIC)
 
     @SuppressWarnings("MagicNumber")
     val defaultLocalDateTime = LocalDateTime(1970, 1, 1, 0, 0, 0)

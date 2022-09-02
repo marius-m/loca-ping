@@ -149,7 +149,13 @@ class LocationService : Service(), LifecycleOwner {
             )
             Timber.tag("TEST").d(message)
             lifecycleScope.launch {
-                when (val result = homeRepository.postPing(content = message)) {
+                val result = homeRepository.postPingDetail(
+                    coordLat = currentLocation.lat,
+                    coordLong = currentLocation.long,
+                    dtLastPing = dtLocationLast,
+                    dtCurrent = dtCurrent,
+                )
+                when (result) {
                     is DataResult.Error -> {
                         Timber.tag("TEST")
                             .d("postPingError(error: %s)", result.throwable)

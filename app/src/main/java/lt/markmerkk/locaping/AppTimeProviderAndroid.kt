@@ -10,6 +10,6 @@ class AppTimeProviderAndroid : AppTimeProvider {
     override fun now(): LocalDateTime = LocalDateTime.now()
     override fun print(localDateTime: LocalDateTime): String {
         val dateTime = localDateTime.toDateTime(dtz)
-        return AppDateTimeUtils.dtFormatterDateTimeBasic.print(dateTime)
+        return AppDateTimeUtils.dtFormatterDateTime.print(dateTime)
     }
 }
