@@ -14,6 +14,9 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ServiceLifecycleDispatcher
 import androidx.lifecycle.lifecycleScope
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
@@ -26,9 +29,11 @@ import lt.markmerkk.locaping.network.DataResult
 import lt.markmerkk.locaping.repositories.HomeRepository
 import lt.markmerkk.locaping.utils.AppDTFormatter
 import lt.markmerkk.locaping.utils.LogUtils.withLogInstance
+import lt.markmerkk.locaping.workers.TrackLocationWorker
 import org.joda.time.DateTime
 import org.joda.time.Period
 import timber.log.Timber
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -55,6 +60,7 @@ class LocationService : Service(), LifecycleOwner {
         lifecycleDispatcher.onServicePreSuperOnStart()
         prepareForegroundNotification()
         startLocationUpdates()
+        startTrackLocationManager()
         Timber.tag("TEST").i("onStartCommand()".withLogInstance(this))
         return START_STICKY
     }
@@ -67,7 +73,8 @@ class LocationService : Service(), LifecycleOwner {
     override fun onDestroy() {
         lifecycleDispatcher.onServicePreSuperOnDestroy()
         Timber.tag("TEST").i("onDestroy()".withLogInstance(this))
-        locationProviderClient.removeLocationUpdates(locationCallback)
+        stopLocationUpdates()
+        stopTrackLocationManager()
         stopForeground(0)
         super.onDestroy()
     }
@@ -81,6 +88,26 @@ class LocationService : Service(), LifecycleOwner {
 
     //endregion
 
+    fun startTrackLocationManager() {
+        val locationWorker =
+            PeriodicWorkRequestBuilder<TrackLocationWorker>(15, TimeUnit.MINUTES)
+                .addTag(WM_TAG_LOCATION)
+                .build()
+        WorkManager
+            .getInstance(applicationContext)
+            .enqueueUniquePeriodicWork(
+                WM_TAG_LOCATION,
+                ExistingPeriodicWorkPolicy.KEEP,
+                locationWorker,
+            )
+    }
+
+    fun stopTrackLocationManager() {
+        WorkManager
+            .getInstance(applicationContext)
+            .cancelAllWorkByTag(WM_TAG_LOCATION)
+    }
+
     @SuppressWarnings("MissingPermission")
     private fun startLocationUpdates() {
         val locationRequest = LocationRequest.create().apply {
@@ -92,6 +119,10 @@ class LocationService : Service(), LifecycleOwner {
             locationCallback,
             Looper.myLooper()
         )
+    }
+
+    private fun stopLocationUpdates() {
+        locationProviderClient.removeLocationUpdates(locationCallback)
     }
 
     private fun prepareForegroundNotification() {
@@ -177,5 +208,7 @@ class LocationService : Service(), LifecycleOwner {
         private const val CHANNEL_ID_DEFAULT = "65beac30-0e52-415a-a52f-f2a24728e787"
         private const val DEFAULT_UPDATE_INTERVAL_MINS: Long = 5
         private const val DEFAULT_UPDATE_INTERVAL_MILLIS: Long = 1000 * 60 * DEFAULT_UPDATE_INTERVAL_MINS
+
+        const val WM_TAG_LOCATION = "WM_TAG.LOCATION"
     }
 }
