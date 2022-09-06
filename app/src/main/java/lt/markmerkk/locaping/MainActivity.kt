@@ -45,7 +45,8 @@ class MainActivity : AppCompatActivity() {
                 this,
                 arrayOf(
                     Manifest.permission.ACCESS_FINE_LOCATION,
-                    Manifest.permission.FOREGROUND_SERVICE
+                    Manifest.permission.FOREGROUND_SERVICE,
+                    // Manifest.permission.POST_NOTIFICATIONS,
                 ),
                 AppConstants.REQUEST_TAG_PERMISSION_LOCATION
             )

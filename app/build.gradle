@@ -5,13 +5,14 @@ plugins {
     id "kotlin-parcelize"
     id "dagger.hilt.android.plugin"
     id "androidx.navigation.safeargs.kotlin"
+    id "com.google.gms.google-services"
 }
 
 android {
     compileSdk 32
 
     defaultConfig {
-        applicationId "lt.markmerkk.testlocationfetch"
+        applicationId "lt.markmerkk.locaping"
         minSdk 24
         targetSdk 32
         versionCode 1
@@ -60,6 +61,10 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-service:2.5.1"
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.5.1"
     implementation "androidx.work:work-runtime-ktx:2.7.1"
+
+    // Firebase
+    implementation platform("com.google.firebase:firebase-bom:30.3.2")
+    implementation("com.google.firebase:firebase-messaging-ktx:23.0.8")
 
     // Coroutines
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.1"

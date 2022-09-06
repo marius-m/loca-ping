@@ -14,6 +14,9 @@ import lt.markmerkk.locaping.AppTimeProvider
 import lt.markmerkk.locaping.AppTimeProviderAndroid
 import lt.markmerkk.locaping.BuildConfig
 import lt.markmerkk.locaping.BuildConfigData
+import lt.markmerkk.locaping.firebase.AppFirebase
+import lt.markmerkk.locaping.repositories.UserStorage
+import lt.markmerkk.locaping.repositories.UserStorageSharedPref
 import javax.inject.Singleton
 
 @Module
@@ -50,6 +53,25 @@ class AppModule {
             baseUrl = "http://app.marius-m.lt",
             versionName = BuildConfig.VERSION_NAME,
             versionCode = BuildConfig.VERSION_CODE
+        )
+    }
+
+    @Provides
+    @Singleton
+    fun provideUserStorage(
+        app: Application,
+    ): UserStorage {
+        return UserStorageSharedPref(app)
+    }
+
+    @Provides
+    @Singleton
+    fun provideFirebase(
+        app: Application,
+        userStorage: UserStorage,
+    ): AppFirebase {
+        return AppFirebase(
+            userStorage = userStorage,
         )
     }
 }

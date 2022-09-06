@@ -42,7 +42,7 @@ class LocationService : Service(), LifecycleOwner {
     @Inject lateinit var homeRepository: HomeRepository
 
     private val lifecycleDispatcher = ServiceLifecycleDispatcher(this)
-
+    private lateinit var channelId: String
     private var dtLocationLast: DateTime? = null
     private var locationFetchCount: Int = 0
     private val locationProviderClient: FusedLocationProviderClient
@@ -53,6 +53,7 @@ class LocationService : Service(), LifecycleOwner {
     override fun onCreate() {
         lifecycleDispatcher.onServicePreSuperOnCreate()
         super.onCreate()
+        channelId = resources.getString(R.string.default_notification_channel_id)
         Timber.tag("TEST").i("onCreate()".withLogInstance(this))
     }
 
@@ -128,7 +129,7 @@ class LocationService : Service(), LifecycleOwner {
     private fun prepareForegroundNotification() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val serviceChannel = NotificationChannel(
-                CHANNEL_ID_DEFAULT,
+                channelId,
                 "Location Service Channel",
                 NotificationManager.IMPORTANCE_DEFAULT
             )
@@ -142,7 +143,7 @@ class LocationService : Service(), LifecycleOwner {
             notificationIntent,
             0
         )
-        val notification: Notification = NotificationCompat.Builder(this, CHANNEL_ID_DEFAULT)
+        val notification: Notification = NotificationCompat.Builder(this, channelId)
             .setContentTitle(getString(R.string.app_name))
             .setContentTitle("Foreground notification")
             .setSmallIcon(R.mipmap.ic_launcher)
@@ -205,7 +206,6 @@ class LocationService : Service(), LifecycleOwner {
     //endregion
 
     companion object {
-        private const val CHANNEL_ID_DEFAULT = "65beac30-0e52-415a-a52f-f2a24728e787"
         private const val DEFAULT_UPDATE_INTERVAL_MINS: Long = 5
         private const val DEFAULT_UPDATE_INTERVAL_MILLIS: Long = 1000 * 60 * DEFAULT_UPDATE_INTERVAL_MINS
 
