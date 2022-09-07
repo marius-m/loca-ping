@@ -20,20 +20,13 @@ class HomeRepository(
     suspend fun postPingDetail(
         coordLat: Double,
         coordLong: Double,
-        dtLastPing: DateTime?,
         dtCurrent: DateTime,
         extras: String = "",
     ): DataResult<String> {
-        val _dtLast = if (dtLastPing == null) {
-            dtCurrent
-        } else {
-            dtLastPing
-        }
         return api.postPingDetail(
             ReqPingDetail(
                 coordLat = coordLat,
                 coordLong = coordLong,
-                dtLastPing = AppDateTimeUtils.dtFormatterDateTime.print(_dtLast),
                 dtCurrent = AppDateTimeUtils.dtFormatterDateTime.print(dtCurrent),
                 extras = extras,
             )

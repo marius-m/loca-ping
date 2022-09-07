@@ -3,6 +3,7 @@ package lt.markmerkk.locaping.firebase
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import dagger.hilt.android.AndroidEntryPoint
+import lt.markmerkk.locaping.Tags
 import lt.markmerkk.locaping.repositories.UserStorage
 import lt.markmerkk.locaping.utils.LogUtils.withLogInstance
 import timber.log.Timber
@@ -21,7 +22,7 @@ class FBMessaging : FirebaseMessagingService() {
     override fun onMessageReceived(message: RemoteMessage) {
         super.onMessageReceived(message)
         val fbData = FBData.from(message)
-        Timber.tag("TEST")
+        Timber.tag(Tags.LOCATION)
             .i("onMessageReceived(message: %s)".withLogInstance(this), fbData)
     }
 
