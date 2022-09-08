@@ -17,12 +17,17 @@ import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import lt.markmerkk.locaping.entities.AppLocation
 import lt.markmerkk.locaping.loaders.LocationLoader
 import lt.markmerkk.locaping.location.LocationFetcher
+import lt.markmerkk.locaping.location.LocationFetcherSync
 import lt.markmerkk.locaping.repositories.HomeRepository
 import lt.markmerkk.locaping.utils.LogUtils.withLogInstance
 import lt.markmerkk.locaping.workers.TrackLocationWorker
+import org.joda.time.Duration
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -48,7 +53,6 @@ class LocationService : Service(), LifecycleOwner {
         locationFetcher = LocationFetcher(
             appContext = this.applicationContext,
             timeProvider = timeProvider,
-            onLocationChange = listenerOnLocationChange,
         )
         locationLoader = LocationLoader(
             homeRepository = homeRepository,
@@ -60,9 +64,8 @@ class LocationService : Service(), LifecycleOwner {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         lifecycleDispatcher.onServicePreSuperOnStart()
         Timber.tag(Tags.LOCATION).i("onStartCommand()".withLogInstance(this))
+//        locationFetcher.onAttach()
         prepareForegroundNotification()
-        locationFetcher.onAttach()
-        startTrackLocationManager()
         return START_STICKY
     }
 
@@ -74,8 +77,7 @@ class LocationService : Service(), LifecycleOwner {
     override fun onDestroy() {
         lifecycleDispatcher.onServicePreSuperOnDestroy()
         Timber.tag(Tags.LOCATION).i("onDestroy()".withLogInstance(this))
-        locationFetcher.onDetach()
-        stopTrackLocationManager()
+//        locationFetcher.onDetach()
         stopForeground(0)
         super.onDestroy()
     }
