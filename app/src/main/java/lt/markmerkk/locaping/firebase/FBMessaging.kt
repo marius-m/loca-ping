@@ -8,6 +8,7 @@ import lt.markmerkk.locaping.Tags
 import lt.markmerkk.locaping.location.LocationFetcherFirstOut
 import lt.markmerkk.locaping.repositories.UserStorage
 import lt.markmerkk.locaping.utils.LogUtils.withLogInstance
+import org.joda.time.Duration
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -41,7 +42,10 @@ class FBMessaging : FirebaseMessagingService() {
         val fbData = FBData.from(message)
         Timber.tag(Tags.LOCATION)
             .i("onMessageReceived(thread: %s, message: %s)".withLogInstance(this), Thread.currentThread(), fbData)
-        locationFetcher.fetchLocation()
+        locationFetcher.fetchLocation(
+            dtFetchStart = timeProvider.now(),
+            durationTimeout = Duration.standardSeconds(5),
+        )
     }
 
     override fun onDestroy() {

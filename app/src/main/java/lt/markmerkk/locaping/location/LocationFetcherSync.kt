@@ -28,20 +28,29 @@ import java.util.concurrent.atomic.AtomicReference
 class LocationFetcherSync(
     private val appContext: Context,
     private val timeProvider: AppTimeProvider
-) {
+) : LocationFetcher {
 
     private val locationProviderClient: FusedLocationProviderClient
         get() = LocationServices.getFusedLocationProviderClient(appContext)
     private val appLocation = AtomicReference<AppLocation?>(null)
     private val handlerThread = HandlerThread("LocationHandlerThread")
 
+    override fun onAttach() { }
+
+    override fun onDetach() {
+        stopLocationUpdates()
+        handlerThread.quit()
+    }
+
+    override fun fetchLocation(dtFetchStart: DateTime, durationTimeout: Duration) { }
+
     /**
      * As this method holds the thread, it also blocks location fetching response as well
      */
     @SuppressWarnings("MissingPermission")
-    fun fetchLocation(
-        dtFetchStart: DateTime = timeProvider.now(),
-        durationTimeout: Duration = Duration.standardSeconds(5)
+    override fun fetchLocationSync(
+        dtFetchStart: DateTime,
+        durationTimeout: Duration,
     ): AppLocation? {
         appLocation.set(null)
         stopLocationUpdates()
@@ -70,11 +79,6 @@ class LocationFetcherSync(
             appLocation.get()
         )
         return appLocation.get()
-    }
-
-    fun onDetach() {
-        stopLocationUpdates()
-        handlerThread.quit()
     }
 
     @SuppressWarnings("MissingPermission")
