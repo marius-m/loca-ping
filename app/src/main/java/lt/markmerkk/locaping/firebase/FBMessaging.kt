@@ -1,14 +1,18 @@
 package lt.markmerkk.locaping.firebase
-
+import androidx.work.ExistingWorkPolicy
+import androidx.work.OneTimeWorkRequest
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import androidx.work.WorkRequest
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import dagger.hilt.android.AndroidEntryPoint
 import lt.markmerkk.locaping.AppTimeProvider
 import lt.markmerkk.locaping.Tags
-import lt.markmerkk.locaping.location.LocationFetcherFirstOut
+import lt.markmerkk.locaping.WorkManagerTags
 import lt.markmerkk.locaping.repositories.UserStorage
 import lt.markmerkk.locaping.utils.LogUtils.withLogInstance
-import org.joda.time.Duration
+import lt.markmerkk.locaping.workers.TrackLocationWorker
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -18,18 +22,8 @@ class FBMessaging : FirebaseMessagingService() {
     @Inject lateinit var userStorage: UserStorage
     @Inject lateinit var timeProvider: AppTimeProvider
 
-    private lateinit var locationFetcher: LocationFetcherFirstOut
-
     override fun onCreate() {
         super.onCreate()
-        locationFetcher = LocationFetcherFirstOut(
-            appContext = applicationContext,
-            timeProvider = timeProvider,
-            onLocationChange = {
-                Timber.tag(Tags.LOCATION)
-                    .d("onLocationChange(location: %s)".withLogInstance(this@FBMessaging), it)
-            }
-        )
     }
 
     override fun onNewToken(token: String) {
@@ -41,16 +35,26 @@ class FBMessaging : FirebaseMessagingService() {
         super.onMessageReceived(message)
         val fbData = FBData.from(message)
         Timber.tag(Tags.LOCATION)
-            .i("onMessageReceived(thread: %s, message: %s)".withLogInstance(this), Thread.currentThread(), fbData)
-        locationFetcher.fetchLocation(
-            dtFetchStart = timeProvider.now(),
-            durationTimeout = Duration.standardSeconds(5),
-        )
+            .i(
+                "onMessageReceived(thread: %s, message: %s)".withLogInstance(this),
+                Thread.currentThread(),
+                fbData
+            )
+        enqueueLocationTrackingWork()
     }
 
     override fun onDestroy() {
-        locationFetcher.onDetach()
         super.onDestroy()
+    }
+
+    private fun enqueueLocationTrackingWork() {
+        Timber.tag(Tags.LOCATION)
+            .i("enqueueLocationTrackingWork()".withLogInstance(this))
+        val workTrackLocation: WorkRequest = OneTimeWorkRequestBuilder<TrackLocationWorker>()
+            .build()
+        WorkManager
+            .getInstance(applicationContext)
+            .enqueue(workTrackLocation)
     }
 
     private data class FBData(

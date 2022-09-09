@@ -36,10 +36,9 @@ class LocationFetcherPeriodic(
         stopLocationUpdates()
     }
 
-    override fun fetchLocation(dtFetchStart: DateTime, durationTimeout: Duration) { }
+    override fun fetchLocation() { }
 
     override fun fetchLocationSync(
-        dtFetchStart: DateTime,
         durationTimeout: Duration
     ): AppLocation? = null
 

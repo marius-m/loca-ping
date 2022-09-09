@@ -1,7 +1,6 @@
 package lt.markmerkk.locaping.location
 
 import android.content.Context
-import android.os.Handler
 import android.os.HandlerThread
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
@@ -9,15 +8,17 @@ import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority.PRIORITY_HIGH_ACCURACY
+import lt.markmerkk.locaping.AppDateTimeUtils
 import lt.markmerkk.locaping.AppTimeProvider
 import lt.markmerkk.locaping.Tags
 import lt.markmerkk.locaping.entities.AppLocation
+import lt.markmerkk.locaping.formatReadable
 import lt.markmerkk.locaping.utils.LogUtils.withLogInstance
 import org.jetbrains.annotations.TestOnly
 import org.joda.time.DateTime
 import org.joda.time.Duration
+import org.joda.time.Period
 import timber.log.Timber
-import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicReference
 
 /**
@@ -42,16 +43,13 @@ class LocationFetcherSync(
         handlerThread.quit()
     }
 
-    override fun fetchLocation(dtFetchStart: DateTime, durationTimeout: Duration) { }
+    override fun fetchLocation() { }
 
-    /**
-     * As this method holds the thread, it also blocks location fetching response as well
-     */
     @SuppressWarnings("MissingPermission")
     override fun fetchLocationSync(
-        dtFetchStart: DateTime,
         durationTimeout: Duration,
     ): AppLocation? {
+        val dtFetchStart = timeProvider.now()
         appLocation.set(null)
         stopLocationUpdates()
         startLocationUpdates()
@@ -59,20 +57,23 @@ class LocationFetcherSync(
         Timber.tag(Tags.LOCATION).d(
             "fetchLocation.init(fetchStart: %s, durationTimeout: %s, dtTimeout: %s)".withLogInstance(this),
             dtFetchStart,
-            durationTimeout,
+            durationTimeout.formatReadable(),
             dtTimeout
         )
         do {
+            val now = timeProvider.now()
+            val timeoutIn = Period(now, dtTimeout).toStandardDuration()
             Timber.tag(Tags.LOCATION).d(
-                "fetchLocation.check(thread: %s)".withLogInstance(this),
+                "fetchLocation.check(thread: %s, timeOutIn: %s)".withLogInstance(this),
                 Thread.currentThread(),
+                timeoutIn.formatReadable(),
             )
             val shouldWaitForObject = shouldWaitForObject(
-                dtNow = timeProvider.now(),
+                dtNow = now,
                 dtTimeout = dtTimeout,
                 targetObject = appLocation.get(),
             )
-            Thread.sleep(500L)
+            Thread.sleep(300L)
         } while (shouldWaitForObject)
         Timber.tag(Tags.LOCATION).d(
             "fetchLocation.result(appLocation: %s)".withLogInstance(this),
@@ -123,8 +124,11 @@ class LocationFetcherSync(
     //endregion
 
     companion object {
+        private const val DEFAULT_TIMEOUT_SEC: Long = 10
         private const val DEFAULT_UPDATE_INTERVAL_MINS: Long = 5
         private const val DEFAULT_UPDATE_INTERVAL_MILLIS: Long = DEFAULT_UPDATE_INTERVAL_MINS * 60 * 1000
+
+        val DEFAULT_TIMEOUT_DURATION: Duration = Duration.standardSeconds(DEFAULT_TIMEOUT_SEC)
 
         @TestOnly
         internal fun shouldWaitForObject(

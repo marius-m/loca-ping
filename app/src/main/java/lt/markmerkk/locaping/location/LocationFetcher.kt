@@ -8,13 +8,17 @@ interface LocationFetcher {
 
     fun onAttach()
     fun onDetach()
-    fun fetchLocation(
-        dtFetchStart: DateTime,
-        durationTimeout: Duration
-    )
+    fun fetchLocation()
 
     fun fetchLocationSync(
-        dtFetchStart: DateTime,
-        durationTimeout: Duration
+        durationTimeout: Duration = DEFAULT_TIMEOUT_DURATION,
     ): AppLocation?
+
+    companion object {
+        const val DEFAULT_TIMEOUT_SEC: Long = 10
+        const val DEFAULT_UPDATE_INTERVAL_MINS: Long = 5
+        const val DEFAULT_UPDATE_INTERVAL_MILLIS: Long = DEFAULT_UPDATE_INTERVAL_MINS * 60 * 1000
+
+        val DEFAULT_TIMEOUT_DURATION: Duration = Duration.standardSeconds(DEFAULT_TIMEOUT_SEC)
+    }
 }
