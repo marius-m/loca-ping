@@ -20,12 +20,11 @@ class LocationLoader(
         source: LocationSource,
     ) {
         lifecycleScope.launch {
-            val extras = "source: %s;".format(source.name)
             val result = homeRepository.postPingDetail(
                 coordLat = currentLocation.lat,
                 coordLong = currentLocation.long,
                 dtCurrent = dtCurrent,
-                extras = extras,
+                locationSource = source,
             )
             when (result) {
                 is DataResult.Error -> {

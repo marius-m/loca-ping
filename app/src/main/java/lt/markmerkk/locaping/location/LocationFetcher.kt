@@ -16,7 +16,7 @@ interface LocationFetcher {
 
     companion object {
         const val DEFAULT_TIMEOUT_SEC: Long = 10
-        const val DEFAULT_UPDATE_INTERVAL_MINS: Long = 5
+        const val DEFAULT_UPDATE_INTERVAL_MINS: Long = 15
         const val DEFAULT_UPDATE_INTERVAL_MILLIS: Long = DEFAULT_UPDATE_INTERVAL_MINS * 60 * 1000
 
         val DEFAULT_TIMEOUT_DURATION: Duration = Duration.standardSeconds(DEFAULT_TIMEOUT_SEC)

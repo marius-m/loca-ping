@@ -52,6 +52,9 @@ class FBMessaging : FirebaseMessagingService() {
             .i("enqueueLocationTrackingWork()".withLogInstance(this))
         val workTrackLocation: WorkRequest = OneTimeWorkRequestBuilder<TrackLocationWorker>()
             .build()
+//        val constraints = Constraints.Builder()
+//            .setRequiredNetworkType(NetworkType.CONNECTED)
+//            .build()
         WorkManager
             .getInstance(applicationContext)
             .enqueue(workTrackLocation)
