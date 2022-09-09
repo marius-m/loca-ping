@@ -1,0 +1,18 @@
+[*.{kt,kts}]
+# Source: https://pinterest.github.io/ktlint/rules/configuration-ktlint/
+
+indent_size=4
+indent_style=space
+insert_final_newline=true
+ktlint_code_style = official
+max_line_length=120
+
+ij_kotlin_allow_trailing_comma = true
+ij_kotlin_allow_trailing_comma_on_call_site = true
+
+ij_kotlin_imports_layout=* # alphabetical with capital letters before lower case letters (e.g. Z before a), no blank lines
+ij_kotlin_imports_layout=*,java.**,javax.**,kotlin.**,^ # default IntelliJ IDEA style, same as alphabetical, but with "java", "javax", "kotlin" and alias imports in the end of the imports list
+ij_kotlin_imports_layout=android.**,|,^org.junit.**,kotlin.io.Closeable.*,|,*,^ # custom imports layout
+ij_kotlin_packages_to_use_import_on_demand = java.util.*,kotlinx.android.synthetic.**
+
+ktlint_ignore_back_ticked_identifier = false
