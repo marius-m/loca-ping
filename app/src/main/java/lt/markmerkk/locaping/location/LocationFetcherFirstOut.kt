@@ -18,6 +18,7 @@ import timber.log.Timber
 import java.util.concurrent.atomic.AtomicReference
 
 /**
+ * Fetches location asynchronously. After getting first location, will cancel callback
  * Lifecycle: [onDetach]
  */
 class LocationFetcherFirstOut(
@@ -28,7 +29,6 @@ class LocationFetcherFirstOut(
 
     private val locationProviderClient: FusedLocationProviderClient
         get() = LocationServices.getFusedLocationProviderClient(appContext)
-    private val appLocation = AtomicReference<AppLocation?>(null)
 
     override fun onAttach() {}
 
@@ -38,7 +38,6 @@ class LocationFetcherFirstOut(
 
     @SuppressWarnings("MissingPermission")
     override fun fetchLocation() {
-        this.appLocation.set(null)
         stopLocationUpdates()
         startLocationUpdates()
         Timber.tag(Tags.LOCATION).d("fetchLocation.init()".withLogInstance(this))
@@ -48,17 +47,12 @@ class LocationFetcherFirstOut(
         durationTimeout: Duration
     ): AppLocation? = null
 
-    private fun recreateHandler(handlerThread: HandlerThread?): HandlerThread {
-        handlerThread?.quitSafely()
-        return HandlerThread("LocationHandlerThread")
-    }
-
     @SuppressWarnings("MissingPermission")
     private fun startLocationUpdates() {
         // TODO Check if permission is grant
         Timber.tag(Tags.LOCATION).d("startLocationUpdates()".withLogInstance(this))
         val locationRequest = LocationRequest.create().apply {
-            interval = DEFAULT_UPDATE_INTERVAL_MILLIS
+            interval = LocationFetcher.DEFAULT_UPDATE_INTERVAL_MILLIS
             priority = PRIORITY_HIGH_ACCURACY
         }
         Timber.tag(Tags.LOCATION)
@@ -87,17 +81,10 @@ class LocationFetcherFirstOut(
                 Thread.currentThread(),
                 currentLocation,
             )
-            appLocation.set(currentLocation)
             onLocationChange?.invoke(currentLocation)
             stopLocationUpdates()
         }
     }
 
     //endregion
-
-    companion object {
-        private const val DEFAULT_UPDATE_INTERVAL_MINS: Long = 5
-        private const val DEFAULT_UPDATE_INTERVAL_MILLIS: Long =
-            DEFAULT_UPDATE_INTERVAL_MINS * 60 * 1000
-    }
 }

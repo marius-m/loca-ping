@@ -13,27 +13,22 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ServiceLifecycleDispatcher
 import androidx.lifecycle.lifecycleScope
-import androidx.work.ExistingPeriodicWorkPolicy
-import androidx.work.PeriodicWorkRequestBuilder
-import androidx.work.WorkManager
 import dagger.hilt.android.AndroidEntryPoint
 import lt.markmerkk.locaping.entities.AppLocation
+import lt.markmerkk.locaping.entities.LocationSource
 import lt.markmerkk.locaping.loaders.LocationLoader
 import lt.markmerkk.locaping.location.LocationFetcher
+import lt.markmerkk.locaping.location.LocationFetcherFirstOut
 import lt.markmerkk.locaping.location.LocationFetcherPeriodic
 import lt.markmerkk.locaping.repositories.HomeRepository
 import lt.markmerkk.locaping.utils.LogUtils.withLogInstance
-import lt.markmerkk.locaping.workers.TrackLocationWorker
-import org.joda.time.Duration
 import timber.log.Timber
-import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 @AndroidEntryPoint
 class LocationService : Service(), LifecycleOwner {
 
     @Inject lateinit var homeRepository: HomeRepository
-
     @Inject lateinit var timeProvider: AppTimeProvider
 
     private val lifecycleDispatcher = ServiceLifecycleDispatcher(this)
@@ -63,16 +58,7 @@ class LocationService : Service(), LifecycleOwner {
         lifecycleDispatcher.onServicePreSuperOnStart()
         Timber.tag(Tags.LOCATION).i("onStartCommand()".withLogInstance(this))
         locationFetcher.onAttach()
-        locationFetcher.fetchLocation(
-            dtFetchStart = timeProvider.now(),
-            durationTimeout = Duration.standardSeconds(5),
-        )
-        val newLocation = locationFetcher.fetchLocationSync(
-            dtFetchStart = timeProvider.now(),
-            durationTimeout = Duration.standardSeconds(5),
-        )
-        Timber.tag(Tags.LOCATION)
-            .i("onStartCommant.newLocation(newLocation: %s)".withLogInstance(this), newLocation)
+        locationFetcher.fetchLocation()
         prepareForegroundNotification()
         return START_STICKY
     }
@@ -98,26 +84,6 @@ class LocationService : Service(), LifecycleOwner {
     override fun getLifecycle(): Lifecycle = lifecycleDispatcher.lifecycle
 
     //endregion
-
-    fun startTrackLocationManager() {
-        val locationWorker =
-            PeriodicWorkRequestBuilder<TrackLocationWorker>(15, TimeUnit.MINUTES)
-                .addTag(WM_TAG_LOCATION)
-                .build()
-        WorkManager
-            .getInstance(applicationContext)
-            .enqueueUniquePeriodicWork(
-                WM_TAG_LOCATION,
-                ExistingPeriodicWorkPolicy.KEEP,
-                locationWorker
-            )
-    }
-
-    fun stopTrackLocationManager() {
-        WorkManager
-            .getInstance(applicationContext)
-            .cancelAllWorkByTag(WM_TAG_LOCATION)
-    }
 
     private fun prepareForegroundNotification() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -151,12 +117,12 @@ class LocationService : Service(), LifecycleOwner {
         locationLoader.postPing(
             currentLocation = appLocation,
             dtCurrent = appLocation.dtCurrent,
+            source = LocationSource.FOREGROUND_SERVICE,
         )
     }
 
     //endregion
 
     companion object {
-        const val WM_TAG_LOCATION = "WM_TAG.LOCATION"
     }
 }

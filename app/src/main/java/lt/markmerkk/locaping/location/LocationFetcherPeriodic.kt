@@ -17,6 +17,9 @@ import org.joda.time.Duration
 import timber.log.Timber
 
 /**
+ * Attaches and fetches location.
+ * Will report location to [onLocationChange].
+ * Starts / ends work on lifecycle events.
  * Lifecycle: [onAttach], [onDetach]
  */
 class LocationFetcherPeriodic(
@@ -46,7 +49,7 @@ class LocationFetcherPeriodic(
     private fun startLocationUpdates() {
         // TODO Check if permission is grant
         val locationRequest = LocationRequest.create().apply {
-            interval = DEFAULT_UPDATE_INTERVAL_MILLIS
+            interval = LocationFetcher.DEFAULT_UPDATE_INTERVAL_MILLIS
             priority = PRIORITY_HIGH_ACCURACY
         }
         locationProviderClient.requestLocationUpdates(
@@ -74,9 +77,4 @@ class LocationFetcherPeriodic(
     }
 
     //endregion
-
-    companion object {
-        private const val DEFAULT_UPDATE_INTERVAL_MINS: Long = 5
-        private const val DEFAULT_UPDATE_INTERVAL_MILLIS: Long = DEFAULT_UPDATE_INTERVAL_MINS * 60 * 1000
-    }
 }

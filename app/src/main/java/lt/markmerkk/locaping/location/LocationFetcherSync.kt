@@ -22,8 +22,8 @@ import timber.log.Timber
 import java.util.concurrent.atomic.AtomicReference
 
 /**
- * A synchronouse operation to fetch location by blocking its execution method
- * It will 'hold' a thread until it gets a location or fails the operation
+ * Synchronously fetches location.
+ * It will 'hold' a thread until it gets a location or fails the operation.
  * Lifecycle: [onDetach]
  */
 class LocationFetcherSync(
@@ -88,7 +88,7 @@ class LocationFetcherSync(
         Timber.tag(Tags.LOCATION).d("startLocationUpdates()".withLogInstance(this))
         handlerThread.start()
         val locationRequest = LocationRequest.create().apply {
-            interval = DEFAULT_UPDATE_INTERVAL_MILLIS
+            interval = LocationFetcher.DEFAULT_UPDATE_INTERVAL_MILLIS
             priority = PRIORITY_HIGH_ACCURACY
         }
         locationProviderClient.requestLocationUpdates(
@@ -124,11 +124,6 @@ class LocationFetcherSync(
     //endregion
 
     companion object {
-        private const val DEFAULT_TIMEOUT_SEC: Long = 10
-        private const val DEFAULT_UPDATE_INTERVAL_MINS: Long = 5
-        private const val DEFAULT_UPDATE_INTERVAL_MILLIS: Long = DEFAULT_UPDATE_INTERVAL_MINS * 60 * 1000
-
-        val DEFAULT_TIMEOUT_DURATION: Duration = Duration.standardSeconds(DEFAULT_TIMEOUT_SEC)
 
         @TestOnly
         internal fun shouldWaitForObject(
