@@ -1,7 +1,6 @@
 package lt.markmerkk.locaping.location
 
 import android.content.Context
-import android.os.Handler
 import android.os.HandlerThread
 import android.os.Looper
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -14,11 +13,8 @@ import lt.markmerkk.locaping.AppTimeProvider
 import lt.markmerkk.locaping.Tags
 import lt.markmerkk.locaping.entities.AppLocation
 import lt.markmerkk.locaping.utils.LogUtils.withLogInstance
-import org.jetbrains.annotations.TestOnly
-import org.joda.time.DateTime
 import org.joda.time.Duration
 import timber.log.Timber
-import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicReference
 
 /**
@@ -33,34 +29,22 @@ class LocationFetcherFirstOut(
     private val locationProviderClient: FusedLocationProviderClient
         get() = LocationServices.getFusedLocationProviderClient(appContext)
     private val appLocation = AtomicReference<AppLocation?>(null)
-    private var handlerThread = HandlerThread("LocationHandlerThread")
 
-    override fun onAttach() { }
+    override fun onAttach() {}
 
     override fun onDetach() {
         stopLocationUpdates()
     }
 
     @SuppressWarnings("MissingPermission")
-    override fun fetchLocation(
-        dtFetchStart: DateTime,
-        durationTimeout: Duration,
-    ) {
-        this.handlerThread = recreateHandler(handlerThread)
+    override fun fetchLocation() {
         this.appLocation.set(null)
         stopLocationUpdates()
-        startLocationUpdates(handlerThread = handlerThread)
-        val dtTimeout = dtFetchStart.plus(durationTimeout)
-        Timber.tag(Tags.LOCATION).d(
-            "fetchLocation.init(fetchStart: %s, durationTimeout: %s, dtTimeout: %s)".withLogInstance(this),
-            dtFetchStart,
-            durationTimeout,
-            dtTimeout
-        )
+        startLocationUpdates()
+        Timber.tag(Tags.LOCATION).d("fetchLocation.init()".withLogInstance(this))
     }
 
     override fun fetchLocationSync(
-        dtFetchStart: DateTime,
         durationTimeout: Duration
     ): AppLocation? = null
 
@@ -70,7 +54,7 @@ class LocationFetcherFirstOut(
     }
 
     @SuppressWarnings("MissingPermission")
-    private fun startLocationUpdates(handlerThread: HandlerThread) {
+    private fun startLocationUpdates() {
         // TODO Check if permission is grant
         Timber.tag(Tags.LOCATION).d("startLocationUpdates()".withLogInstance(this))
         val locationRequest = LocationRequest.create().apply {
@@ -78,18 +62,17 @@ class LocationFetcherFirstOut(
             priority = PRIORITY_HIGH_ACCURACY
         }
         Timber.tag(Tags.LOCATION)
-            .d("startLocationUpdates.requestLocationUpdates(handler: %s)".withLogInstance(this), handlerThread)
+            .d("startLocationUpdates.requestLocationUpdates()".withLogInstance(this))
         locationProviderClient.requestLocationUpdates(
             locationRequest,
             locationCallback,
-            null,
+            Looper.myLooper(),
         )
     }
 
     private fun stopLocationUpdates() {
         Timber.tag(Tags.LOCATION).d("stopLocationUpdates()".withLogInstance(this))
         locationProviderClient.removeLocationUpdates(locationCallback)
-        handlerThread.quitSafely()
     }
 
     //region Listeners
@@ -114,6 +97,7 @@ class LocationFetcherFirstOut(
 
     companion object {
         private const val DEFAULT_UPDATE_INTERVAL_MINS: Long = 5
-        private const val DEFAULT_UPDATE_INTERVAL_MILLIS: Long = DEFAULT_UPDATE_INTERVAL_MINS * 60 * 1000
+        private const val DEFAULT_UPDATE_INTERVAL_MILLIS: Long =
+            DEFAULT_UPDATE_INTERVAL_MINS * 60 * 1000
     }
 }
