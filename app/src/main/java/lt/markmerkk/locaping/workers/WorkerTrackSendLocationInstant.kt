@@ -45,7 +45,7 @@ class WorkerTrackSendLocationInstant @AssistedInject constructor(
             val newLocation = locationFetcher
                 .fetchLocationSync(durationTimeout = LocationFetcher.DEFAULT_TIMEOUT_DURATION)
             Timber.tag(Tags.LOCATION).d(
-                "doWork.success(newDuration: %s)".withLogInstance(this@WorkerTrackSendLocationInstant),
+                "doWork.success(newLocation: %s)".withLogInstance(this@WorkerTrackSendLocationInstant),
                 newLocation,
             )
             if (newLocation != null) {

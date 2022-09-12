@@ -4,6 +4,7 @@ enum class LocationSource {
     UNKNOWN,
     FOREGROUND_SERVICE,
     PUSH_NOTIFICATION_WORKER,
+    ALARM_MANAGER,
     ;
 
     companion object {

@@ -1,18 +1,22 @@
 package lt.markmerkk.locaping
 
 import android.app.Application
+import android.content.Context
 import androidx.hilt.work.HiltWorkerFactory
 import androidx.startup.AppInitializer
 import androidx.work.Configuration
 import androidx.work.Constraints
+import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import dagger.hilt.android.HiltAndroidApp
+import lt.markmerkk.locaping.alarm.RemindersManager
 import lt.markmerkk.locaping.firebase.AppFirebase
 import lt.markmerkk.locaping.utils.LogUtils.withLogInstance
 import lt.markmerkk.locaping.workers.WorkerSendPings
 import net.danlew.android.joda.JodaTimeInitializer
+import org.joda.time.Duration
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -22,6 +26,7 @@ class App: Application(), Configuration.Provider {
 
     @Inject lateinit var appFirebase: AppFirebase
     @Inject lateinit var workerFactory: HiltWorkerFactory
+    @Inject lateinit var timeProvider: AppTimeProvider
 
     override fun onCreate() {
         super.onCreate()
@@ -30,6 +35,7 @@ class App: Application(), Configuration.Provider {
             .initializeComponent(JodaTimeInitializer::class.java)
         appFirebase.onCreate()
         enqueueLocationSendingWork()
+        scheduleAlarmManager(context = this)
     }
 
     override fun getWorkManagerConfiguration() =
@@ -45,10 +51,17 @@ class App: Application(), Configuration.Provider {
             .build()
         val work = PeriodicWorkRequestBuilder<WorkerSendPings>(30, TimeUnit.MINUTES)
             .setConstraints(constraints)
-            .addTag(WorkManagerTags.PING)
             .build()
         WorkManager
             .getInstance(applicationContext)
-            .enqueue(work)
+            .enqueueUniquePeriodicWork(WorkManagerTags.PING, ExistingPeriodicWorkPolicy.KEEP, work)
+    }
+
+    private fun scheduleAlarmManager(context: Context) {
+        RemindersManager.startReminder(
+            context = context,
+            timeProvider = timeProvider,
+            reminderDurationFromNow = Duration.standardMinutes(2)
+        )
     }
 }
