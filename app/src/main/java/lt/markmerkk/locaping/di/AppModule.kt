@@ -14,6 +14,7 @@ import lt.markmerkk.locaping.AppTimeProvider
 import lt.markmerkk.locaping.AppTimeProviderAndroid
 import lt.markmerkk.locaping.BuildConfig
 import lt.markmerkk.locaping.BuildConfigData
+import lt.markmerkk.locaping.db.AppDatabase
 import lt.markmerkk.locaping.firebase.AppFirebase
 import lt.markmerkk.locaping.repositories.UserStorage
 import lt.markmerkk.locaping.repositories.UserStorageSharedPref
@@ -73,5 +74,13 @@ class AppModule {
         return AppFirebase(
             userStorage = userStorage,
         )
+    }
+
+    @Provides
+    @Singleton
+    fun provideAppDb(
+        app: Application,
+    ): AppDatabase {
+        return AppDatabase.getInstance(app)!!
     }
 }

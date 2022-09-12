@@ -1,6 +1,4 @@
 package lt.markmerkk.locaping.firebase
-import androidx.work.ExistingWorkPolicy
-import androidx.work.OneTimeWorkRequest
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkRequest
@@ -9,10 +7,9 @@ import com.google.firebase.messaging.RemoteMessage
 import dagger.hilt.android.AndroidEntryPoint
 import lt.markmerkk.locaping.AppTimeProvider
 import lt.markmerkk.locaping.Tags
-import lt.markmerkk.locaping.WorkManagerTags
 import lt.markmerkk.locaping.repositories.UserStorage
 import lt.markmerkk.locaping.utils.LogUtils.withLogInstance
-import lt.markmerkk.locaping.workers.TrackLocationWorker
+import lt.markmerkk.locaping.workers.WorkerTrackSendLocationInstant
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -50,7 +47,7 @@ class FBMessaging : FirebaseMessagingService() {
     private fun enqueueLocationTrackingWork() {
         Timber.tag(Tags.LOCATION)
             .i("enqueueLocationTrackingWork()".withLogInstance(this))
-        val workTrackLocation: WorkRequest = OneTimeWorkRequestBuilder<TrackLocationWorker>()
+        val workTrackLocation: WorkRequest = OneTimeWorkRequestBuilder<WorkerTrackSendLocationInstant>()
             .build()
 //        val constraints = Constraints.Builder()
 //            .setRequiredNetworkType(NetworkType.CONNECTED)

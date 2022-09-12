@@ -3,6 +3,8 @@ package lt.markmerkk.locaping.loaders
 import androidx.lifecycle.LifecycleCoroutineScope
 import kotlinx.coroutines.launch
 import lt.markmerkk.locaping.Tags
+import lt.markmerkk.locaping.db.AppDatabase
+import lt.markmerkk.locaping.db.LocationEntry
 import lt.markmerkk.locaping.entities.AppLocation
 import lt.markmerkk.locaping.entities.LocationSource
 import lt.markmerkk.locaping.network.DataResult
@@ -11,20 +13,20 @@ import org.joda.time.DateTime
 import timber.log.Timber
 
 class LocationLoader(
+    private val appDatabase: AppDatabase,
     private val homeRepository: HomeRepository,
     private val lifecycleScope: LifecycleCoroutineScope,
 ) {
     fun postPing(
         currentLocation: AppLocation,
         dtCurrent: DateTime,
-        source: LocationSource,
     ) {
         lifecycleScope.launch {
             val result = homeRepository.postPingDetail(
                 coordLat = currentLocation.lat,
                 coordLong = currentLocation.long,
                 dtCurrent = dtCurrent,
-                locationSource = source,
+                locationSource = currentLocation.source,
             )
             when (result) {
                 is DataResult.Error -> {
@@ -36,6 +38,19 @@ class LocationLoader(
                         .d("postPingSuccess(content: %s)", result.result)
                 }
             }
+        }
+    }
+
+    fun postPingDeferrable(
+        currentLocation: AppLocation,
+    ) {
+        lifecycleScope.launch {
+            appDatabase.locationDao().insert(
+                LocationEntry.fromAppLocation(
+                    appLocation = currentLocation,
+                    locationSource = currentLocation.source,
+                ),
+            )
         }
     }
 }

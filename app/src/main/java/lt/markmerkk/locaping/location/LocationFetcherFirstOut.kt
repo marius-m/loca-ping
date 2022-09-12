@@ -12,6 +12,7 @@ import com.google.android.gms.location.Priority.PRIORITY_HIGH_ACCURACY
 import lt.markmerkk.locaping.AppTimeProvider
 import lt.markmerkk.locaping.Tags
 import lt.markmerkk.locaping.entities.AppLocation
+import lt.markmerkk.locaping.entities.LocationSource
 import lt.markmerkk.locaping.utils.LogUtils.withLogInstance
 import org.joda.time.Duration
 import timber.log.Timber
@@ -24,6 +25,7 @@ import java.util.concurrent.atomic.AtomicReference
 class LocationFetcherFirstOut(
     private val appContext: Context,
     private val timeProvider: AppTimeProvider,
+    private val locationSource: LocationSource,
     private var onLocationChange: ((AppLocation) -> Unit)? = null,
 ) : LocationFetcher {
 
@@ -75,7 +77,7 @@ class LocationFetcherFirstOut(
         override fun onLocationResult(locationResult: LocationResult) {
             super.onLocationResult(locationResult)
             val currentLocation = AppLocation
-                .fromLocation(timeProvider, locationResult.lastLocation)
+                .fromLocation(timeProvider, locationResult.lastLocation, locationSource)
             Timber.tag(Tags.LOCATION).d(
                 "locationCallback(thread: %s, location: %s)".withLogInstance(this@LocationFetcherFirstOut),
                 Thread.currentThread(),

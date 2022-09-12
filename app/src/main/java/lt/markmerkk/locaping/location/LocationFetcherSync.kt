@@ -12,6 +12,7 @@ import lt.markmerkk.locaping.AppDateTimeUtils
 import lt.markmerkk.locaping.AppTimeProvider
 import lt.markmerkk.locaping.Tags
 import lt.markmerkk.locaping.entities.AppLocation
+import lt.markmerkk.locaping.entities.LocationSource
 import lt.markmerkk.locaping.formatReadable
 import lt.markmerkk.locaping.utils.LogUtils.withLogInstance
 import org.jetbrains.annotations.TestOnly
@@ -28,7 +29,8 @@ import java.util.concurrent.atomic.AtomicReference
  */
 class LocationFetcherSync(
     private val appContext: Context,
-    private val timeProvider: AppTimeProvider
+    private val timeProvider: AppTimeProvider,
+    private val locationSource: LocationSource,
 ) : LocationFetcher {
 
     private val locationProviderClient: FusedLocationProviderClient
@@ -110,7 +112,7 @@ class LocationFetcherSync(
         override fun onLocationResult(locationResult: LocationResult) {
             super.onLocationResult(locationResult)
             val currentLocation = AppLocation
-                .fromLocation(timeProvider, locationResult.lastLocation)
+                .fromLocation(timeProvider, locationResult.lastLocation, locationSource)
             Timber.tag(Tags.LOCATION).d(
                 "locationCallback(thread: %s, location: %s)".withLogInstance(this@LocationFetcherSync),
                 Thread.currentThread(),

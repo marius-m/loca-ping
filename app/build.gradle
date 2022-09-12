@@ -65,6 +65,11 @@ dependencies {
     implementation("androidx.hilt:hilt-work:1.0.0")
     kapt("androidx.hilt:hilt-compiler:1.0.0")
 
+    // Room
+    implementation "androidx.room:room-runtime:2.4.3"
+    kapt "androidx.room:room-compiler:2.4.3"
+    implementation "androidx.room:room-ktx:2.4.3"
+
     // Firebase
     implementation platform("com.google.firebase:firebase-bom:30.3.2")
     implementation("com.google.firebase:firebase-messaging-ktx:23.0.8")

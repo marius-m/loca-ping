@@ -14,6 +14,8 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ServiceLifecycleDispatcher
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
+import lt.markmerkk.locaping.db.AppDatabase
+import lt.markmerkk.locaping.db.LocationEntry
 import lt.markmerkk.locaping.entities.AppLocation
 import lt.markmerkk.locaping.entities.LocationSource
 import lt.markmerkk.locaping.loaders.LocationLoader
@@ -30,6 +32,7 @@ class LocationService : Service(), LifecycleOwner {
 
     @Inject lateinit var homeRepository: HomeRepository
     @Inject lateinit var timeProvider: AppTimeProvider
+    @Inject lateinit var db: AppDatabase
 
     private val lifecycleDispatcher = ServiceLifecycleDispatcher(this)
     private lateinit var channelId: String
@@ -46,8 +49,10 @@ class LocationService : Service(), LifecycleOwner {
             appContext = this.applicationContext,
             timeProvider = timeProvider,
             onLocationChange = listenerOnLocationChange,
+            locationSource = LocationSource.FOREGROUND_SERVICE
         )
         locationLoader = LocationLoader(
+            appDatabase = db,
             homeRepository = homeRepository,
             lifecycleScope = lifecycleScope,
         )
@@ -114,15 +119,16 @@ class LocationService : Service(), LifecycleOwner {
     //region Listeners
 
     private val listenerOnLocationChange: (AppLocation) -> Unit = { appLocation ->
-        locationLoader.postPing(
+//        locationLoader.postPing(
+//            currentLocation = appLocation,
+//            dtCurrent = appLocation.dtCurrent,
+//            source = LocationSource.FOREGROUND_SERVICE,
+//        )
+        locationLoader.postPingDeferrable(
             currentLocation = appLocation,
-            dtCurrent = appLocation.dtCurrent,
-            source = LocationSource.FOREGROUND_SERVICE,
         )
     }
 
     //endregion
 
-    companion object {
-    }
 }

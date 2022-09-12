@@ -5,4 +5,11 @@ enum class LocationSource {
     FOREGROUND_SERVICE,
     PUSH_NOTIFICATION_WORKER,
     ;
+
+    companion object {
+        fun fromRaw(rawSource: String): LocationSource {
+            return values()
+                .firstOrNull { it.name.equals(rawSource, ignoreCase = true) } ?: UNKNOWN
+        }
+    }
 }

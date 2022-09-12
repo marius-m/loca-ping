@@ -23,6 +23,9 @@ object AppDateTimeUtils {
     @SuppressWarnings("MagicNumber")
     val defaultLocalDateTime = LocalDateTime(1970, 1, 1, 0, 0, 0)
 
+    @SuppressWarnings("MagicNumber")
+    val defaultDateTime = DateTime(1970, 1, 1, 0, 0, 0)
+
     /**
      * Prints an exception if not available
      */
