@@ -5,4 +5,5 @@ object Tags {
     const val NETWORK = "NETWORK"
     const val LOGIN = "LOGIN"
     const val LOCATION = "LOCATION"
+    const val SPLASH = "SPLASH"
 }
