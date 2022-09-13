@@ -12,7 +12,6 @@ import lt.markmerkk.locaping.Tags
 import lt.markmerkk.locaping.db.AppDatabase
 import lt.markmerkk.locaping.db.LocationEntry.Companion.toAppLocation
 import lt.markmerkk.locaping.entities.AppLocation
-import lt.markmerkk.locaping.entities.LocationSource
 import lt.markmerkk.locaping.network.DataResult
 import lt.markmerkk.locaping.repositories.HomeRepository
 import lt.markmerkk.locaping.repositories.UserStorage
@@ -44,7 +43,10 @@ class WorkerSendPings @AssistedInject constructor(
                 val appLocation = locationEntry.toAppLocation()
                 Timber.tag(Tags.LOCATION)
                     .d("doWork.postPing(ping: %s)".withLogInstance(this@WorkerSendPings), appLocation)
-                val resultPing = postPing(appLocation = appLocation)
+                val resultPing = postPing(
+                    appLocation = appLocation,
+                    extras = locationEntry.extras,
+                )
                 when (resultPing) {
                     is DataResult.Error -> {
                         Timber.tag(Tags.LOCATION).w(
@@ -84,12 +86,16 @@ class WorkerSendPings @AssistedInject constructor(
         }
     }
 
-    private suspend fun postPing(appLocation: AppLocation): DataResult<String> {
+    private suspend fun postPing(
+        appLocation: AppLocation,
+        extras: String,
+    ): DataResult<String> {
         return homeRepository.postPingDetail(
             coordLat = appLocation.lat,
             coordLong = appLocation.long,
             dtCurrent = appLocation.dtCurrent,
             locationSource = appLocation.source,
+            extras = extras,
         )
     }
 }

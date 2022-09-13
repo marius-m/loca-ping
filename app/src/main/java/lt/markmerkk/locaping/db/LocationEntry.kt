@@ -15,6 +15,7 @@ open class LocationEntry(
     @ColumnInfo(name = "longitude") var longitude: Double,
     @ColumnInfo(name = "dt_current_millis") var dtCurrentMillis: Long,
     @ColumnInfo(name = "location_source") var locationSource: String,
+    @ColumnInfo(name = "extra") var extras: String,
 ) {
 
     constructor(): this(
@@ -23,18 +24,21 @@ open class LocationEntry(
         longitude = 0.0,
         dtCurrentMillis = AppDateTimeUtils.defaultDateTime.millis,
         locationSource = LocationSource.UNKNOWN.name,
+        extras = "",
     )
 
     companion object {
         fun fromAppLocation(
             appLocation: AppLocation,
             locationSource: LocationSource = LocationSource.UNKNOWN,
+            extras: String = "",
         ): LocationEntry {
             return LocationEntry(
                 latitude = appLocation.lat,
                 longitude = appLocation.long,
                 dtCurrentMillis = appLocation.dtCurrent.millis,
                 locationSource = locationSource.name,
+                extras = extras,
             )
         }
 

@@ -7,6 +7,7 @@ import androidx.work.WorkerParameters
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.coroutineScope
+import lt.markmerkk.locaping.AppDateTimeUtils
 import lt.markmerkk.locaping.AppTimeProvider
 import lt.markmerkk.locaping.Tags
 import lt.markmerkk.locaping.db.AppDatabase
@@ -17,7 +18,9 @@ import lt.markmerkk.locaping.location.LocationFetcherSync
 import lt.markmerkk.locaping.network.DataResult
 import lt.markmerkk.locaping.repositories.HomeRepository
 import lt.markmerkk.locaping.utils.LogUtils.withLogInstance
+import org.joda.time.DateTime
 import timber.log.Timber
+import java.lang.StringBuilder
 import javax.inject.Inject
 
 @HiltWorker
@@ -30,7 +33,12 @@ class WorkerTrackSendLocationInstant @AssistedInject constructor(
     @Inject lateinit var homeRepository: HomeRepository
     @Inject lateinit var appDatabase: AppDatabase
 
+    private val dtPushNotificationRaw = workerParams
+        .inputData
+        .getString(BUNDLE_KEY_PUSH_DT_RAW)
+
     override suspend fun doWork(): Result = coroutineScope {
+        val dtPushNotification = AppDateTimeUtils.parseDateTimeOrNull(dtPushNotificationRaw)
         val locationFetcher: LocationFetcher = LocationFetcherSync(
             appContext = applicationContext,
             timeProvider = timeProvider,
@@ -49,7 +57,11 @@ class WorkerTrackSendLocationInstant @AssistedInject constructor(
                 newLocation,
             )
             if (newLocation != null) {
-                when (val resultPing = postPing(appLocation = newLocation)) {
+                val resultPing = postPing(
+                    appLocation = newLocation,
+                    dtPushNotification = dtPushNotification,
+                )
+                when (resultPing) {
                     is DataResult.Error -> {
                         Timber.tag(Tags.LOCATION).w(
                             resultPing.throwable,
@@ -77,12 +89,23 @@ class WorkerTrackSendLocationInstant @AssistedInject constructor(
         }
     }
 
-    private suspend fun postPing(appLocation: AppLocation): DataResult<String> {
+    private suspend fun postPing(
+        appLocation: AppLocation,
+        dtPushNotification: DateTime?,
+    ): DataResult<String> {
+        val extras = StringBuilder("dtPushNotification: ")
+            .append(dtPushNotification)
+            .append(";")
         return homeRepository.postPingDetail(
             coordLat = appLocation.lat,
             coordLong = appLocation.long,
             dtCurrent = appLocation.dtCurrent,
             locationSource = appLocation.source,
+            extras = extras.toString(),
         )
+    }
+
+    companion object {
+        const val BUNDLE_KEY_PUSH_DT_RAW = "BUNDLE_KEY_PUSH_DT"
     }
 }

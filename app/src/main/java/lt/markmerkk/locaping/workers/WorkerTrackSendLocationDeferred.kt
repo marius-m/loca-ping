@@ -7,18 +7,18 @@ import androidx.work.WorkerParameters
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.coroutineScope
+import lt.markmerkk.locaping.AppDateTimeUtils
 import lt.markmerkk.locaping.AppTimeProvider
 import lt.markmerkk.locaping.Tags
 import lt.markmerkk.locaping.db.AppDatabase
 import lt.markmerkk.locaping.db.LocationEntry
-import lt.markmerkk.locaping.entities.AppLocation
 import lt.markmerkk.locaping.entities.LocationSource
 import lt.markmerkk.locaping.location.LocationFetcher
 import lt.markmerkk.locaping.location.LocationFetcherSync
-import lt.markmerkk.locaping.network.DataResult
 import lt.markmerkk.locaping.repositories.HomeRepository
 import lt.markmerkk.locaping.utils.LogUtils.withLogInstance
 import timber.log.Timber
+import java.lang.StringBuilder
 import javax.inject.Inject
 
 @HiltWorker
@@ -31,7 +31,12 @@ class WorkerTrackSendLocationDeferred @AssistedInject constructor(
     @Inject lateinit var homeRepository: HomeRepository
     @Inject lateinit var appDatabase: AppDatabase
 
+    private val dtPushNotificationRaw = workerParams
+        .inputData
+        .getString(BUNDLE_KEY_PUSH_DT_RAW)
+
     override suspend fun doWork(): Result = coroutineScope {
+        val dtPushNotification = AppDateTimeUtils.parseDateTimeOrNull(dtPushNotificationRaw)
         val locationFetcher: LocationFetcher = LocationFetcherSync(
             appContext = applicationContext,
             timeProvider = timeProvider,
@@ -50,12 +55,16 @@ class WorkerTrackSendLocationDeferred @AssistedInject constructor(
                 newLocation,
             )
             if (newLocation != null) {
+                val extras = StringBuilder("dtPushNotification: ")
+                    .append(dtPushNotification)
+                    .append(";")
                 appDatabase
                     .locationDao()
                     .insert(
                         LocationEntry.fromAppLocation(
                             appLocation = newLocation,
                             locationSource = LocationSource.PUSH_NOTIFICATION_WORKER,
+                            extras = extras.toString(),
                         )
                     )
                 Timber.tag(Tags.LOCATION).d(
@@ -73,5 +82,9 @@ class WorkerTrackSendLocationDeferred @AssistedInject constructor(
         } finally {
             locationFetcher.onDetach()
         }
+    }
+
+    companion object {
+        const val BUNDLE_KEY_PUSH_DT_RAW = "BUNDLE_KEY_PUSH_DT"
     }
 }
