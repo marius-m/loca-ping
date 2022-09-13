@@ -36,7 +36,7 @@ class AlarmReceiver : BroadcastReceiver(), LifecycleOwner {
         val locationFetcher: LocationFetcher = LocationFetcherSync(
             appContext = context.applicationContext,
             timeProvider = timeProvider,
-            locationSource = LocationSource.PUSH_NOTIFICATION_WORKER,
+            locationSource = LocationSource.ALARM_MANAGER,
         )
         try {
             lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_START)
