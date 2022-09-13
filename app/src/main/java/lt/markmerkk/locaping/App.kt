@@ -61,7 +61,6 @@ class App: Application(), Configuration.Provider {
         RemindersManager.startReminder(
             context = context,
             timeProvider = timeProvider,
-            reminderDurationFromNow = Duration.standardMinutes(2)
         )
     }
 }

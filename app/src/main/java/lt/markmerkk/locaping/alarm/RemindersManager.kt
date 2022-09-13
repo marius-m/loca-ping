@@ -12,13 +12,14 @@ import org.joda.time.Duration
 import timber.log.Timber
 
 object RemindersManager {
+    const val DEFAULT_ALARM_TIMEOUT_MIN = 15L
     fun startReminder(
         context: Context,
+        am: AlarmManager =context.getSystemService(Context.ALARM_SERVICE) as AlarmManager,
         timeProvider: AppTimeProvider,
-        reminderDurationFromNow: Duration = Duration.standardMinutes(5),
+        reminderDurationFromNow: Duration = Duration.standardMinutes(DEFAULT_ALARM_TIMEOUT_MIN),
         reminderId: Int = AppConstants.REQUEST_REMINDER_ID,
     ) {
-        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val intent =
             Intent(context.applicationContext, AlarmReceiver::class.java).let { intent ->
                 PendingIntent.getBroadcast(
@@ -40,7 +41,8 @@ object RemindersManager {
 //        )
 
         // No additional permission
-        alarmManager.setAndAllowWhileIdle(
+        stopReminder(context, am, reminderId = reminderId)
+        am.setAndAllowWhileIdle(
             AlarmManager.RTC_WAKEUP,
             dtTarget.millis,
             intent,
@@ -49,9 +51,11 @@ object RemindersManager {
 
     fun stopReminder(
         context: Context,
+        am: AlarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager,
         reminderId: Int = AppConstants.REQUEST_REMINDER_ID,
     ) {
-        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        Timber.tag(Tags.LOCATION)
+            .d("stopReminder()".withLogInstance(this))
         val intent = Intent(context, AlarmReceiver::class.java).let { intent ->
             PendingIntent.getBroadcast(
                 context,
@@ -60,6 +64,6 @@ object RemindersManager {
                 0
             )
         }
-        alarmManager.cancel(intent)
+        am.cancel(intent)
     }
 }

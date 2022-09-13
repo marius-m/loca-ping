@@ -23,6 +23,7 @@ import lt.markmerkk.locaping.location.LocationFetcher
 import lt.markmerkk.locaping.location.LocationFetcherFirstOut
 import lt.markmerkk.locaping.location.LocationFetcherPeriodic
 import lt.markmerkk.locaping.repositories.HomeRepository
+import lt.markmerkk.locaping.repositories.UserStorage
 import lt.markmerkk.locaping.utils.LogUtils.withLogInstance
 import timber.log.Timber
 import javax.inject.Inject
@@ -33,6 +34,7 @@ class LocationService : Service(), LifecycleOwner {
     @Inject lateinit var homeRepository: HomeRepository
     @Inject lateinit var timeProvider: AppTimeProvider
     @Inject lateinit var db: AppDatabase
+    @Inject lateinit var userStorage: UserStorage
 
     private val lifecycleDispatcher = ServiceLifecycleDispatcher(this)
     private lateinit var channelId: String
@@ -61,7 +63,10 @@ class LocationService : Service(), LifecycleOwner {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         lifecycleDispatcher.onServicePreSuperOnStart()
-        Timber.tag(Tags.LOCATION).i("onStartCommand()".withLogInstance(this))
+        Timber.tag(Tags.LOCATION).i(
+            "onStartCommand(fcmToken: %s)".withLogInstance(this),
+            userStorage.fcmToken,
+        )
         locationFetcher.onAttach()
         locationFetcher.fetchLocation()
         prepareForegroundNotification()

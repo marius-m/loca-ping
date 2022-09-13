@@ -18,7 +18,10 @@ class UserStorageSharedPref(
     private var tokenFb: String = sharedPreferences.getString(KEY_FB_TOKEN, "")!!
     private var lastFetchInMillis: Long = sharedPreferences.getLong(KEY_LAST_FETCH_MILLIS, 0L)!!
 
-    override fun saveTokenFb(newToken: String) {
+    override val fcmToken: String
+        get() = tokenFb
+
+    override fun saveFcmToken(newToken: String) {
         this.tokenFb = newToken
         sharedPreferences.edit()
             .putString(KEY_FB_TOKEN, newToken)

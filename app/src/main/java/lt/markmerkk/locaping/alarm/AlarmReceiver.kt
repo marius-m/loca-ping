@@ -30,6 +30,7 @@ class AlarmReceiver : BroadcastReceiver(), LifecycleOwner {
     private val lifecycleRegistry = LifecycleRegistry(this)
 
     override fun onReceive(context: Context, intent: Intent) {
+        rescheduleAlarm(context)
         lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_CREATE)
         Timber.tag(Tags.LOCATION)
             .d("onReceive.init()".withLogInstance(this))
@@ -66,16 +67,6 @@ class AlarmReceiver : BroadcastReceiver(), LifecycleOwner {
                     )
                 }
             }
-            Timber.tag(Tags.LOCATION).d(
-                "onReceive.scheduleNextAlarm()".withLogInstance(this),
-                newLocation,
-            )
-            RemindersManager.stopReminder(context)
-            RemindersManager.startReminder(
-                context = context,
-                timeProvider = timeProvider,
-                reminderDurationFromNow = Duration.standardMinutes(15)
-            )
             lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_STOP)
         } catch (e: Exception) {
             Timber.tag(Tags.LOCATION).w(
@@ -86,6 +77,15 @@ class AlarmReceiver : BroadcastReceiver(), LifecycleOwner {
         } finally {
             lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
         }
+    }
+
+    private fun rescheduleAlarm(context: Context) {
+        RemindersManager.stopReminder(context)
+        RemindersManager.startReminder(
+            context = context,
+            timeProvider = timeProvider,
+            reminderDurationFromNow = Duration.standardMinutes(RemindersManager.DEFAULT_ALARM_TIMEOUT_MIN),
+        )
     }
 
     override fun getLifecycle(): Lifecycle = lifecycleRegistry

@@ -29,7 +29,7 @@ class FBMessaging : FirebaseMessagingService() {
 
     override fun onNewToken(token: String) {
         super.onNewToken(token)
-        userStorage.saveTokenFb(newToken = token)
+        userStorage.saveFcmToken(newToken = token)
     }
 
     override fun onMessageReceived(message: RemoteMessage) {
