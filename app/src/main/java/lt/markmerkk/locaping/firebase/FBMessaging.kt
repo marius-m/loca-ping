@@ -29,6 +29,12 @@ class FBMessaging : FirebaseMessagingService() {
 
     override fun onNewToken(token: String) {
         super.onNewToken(token)
+        Timber.tag(Tags.LOCATION)
+            .i(
+                "onNewToken(thread: %s, token: %s)".withLogInstance(this),
+                Thread.currentThread(),
+                token,
+            )
         userStorage.saveFcmToken(newToken = token)
     }
 
@@ -43,6 +49,15 @@ class FBMessaging : FirebaseMessagingService() {
             )
 //        enqueueLocationTrackingWorkInstant(now = timeProvider.now())
         enqueueLocationTrackingWorkDeferred(now = timeProvider.now())
+    }
+
+    override fun onDeletedMessages() {
+        super.onDeletedMessages()
+        Timber.tag(Tags.LOCATION)
+            .i(
+                "onDeletedMessages(thread: %s)".withLogInstance(this),
+                Thread.currentThread(),
+            )
     }
 
     override fun onDestroy() {
